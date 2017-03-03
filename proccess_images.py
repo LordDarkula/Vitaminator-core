@@ -15,7 +15,7 @@ def save_to_np(image_path, name):
     np.save(name, arr=arr)
 
 
-def get_images(dir_path, image_dir='images/', np_dir="numpy/"):
+def get_images(dir_path, image_dir='images/', np_dir="output_arrs/"):
     if not os.path.exists(image_dir):
         os.makedirs(image_dir)
     if not os.path.exists(np_dir):
