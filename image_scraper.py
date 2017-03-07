@@ -23,7 +23,6 @@ class ImageScraper(HTMLParser):
             for (attr, value) in attrs:
                 if attr == 'href' or attr == 'data-href':
                     if len(value) > 4:
-
                         print(value)
                         is_image = value[-4:] == '.jpg' or \
                             value[-4:] == '.png' or \
@@ -48,8 +47,7 @@ def gather_image_links(base_url):
     html_string = ''
     try:
         print("TRYING")
-
-        req = urllib.request.Request(base_url, headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib2.Request(base_url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urlopen(req)
         # if response.getheader('content-type') == 'text/html':
         html_bytes = response.read()
@@ -83,7 +81,6 @@ def download_images(image_links, folder_name):
 
         try:
             urllib.urlretrieve(link, full_name)
-
         except Exception:
             print('generic exception: ' + traceback.format_exc())
 
@@ -91,5 +88,5 @@ def download_images(image_links, folder_name):
 if __name__ == '__main__':
     my_set = gather_image_links(
         'http://www.bing.com/images/search?q=leukonychia+nail+disease')
-    print(len(my_set))
+    print(my_set)
     download_images(my_set, 'white_spots')
