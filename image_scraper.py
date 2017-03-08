@@ -31,7 +31,7 @@ class ImageScraper(HTMLParser):
                         if is_image:
 
                             ImageScraper.links.add(value)
-                        elif ImageScraper.num_recursions < 10:
+                        elif ImageScraper.num_recursions < 100:
                             ImageScraper.num_recursions += 1
                             print(ImageScraper.num_recursions)
                             gather_image_links(value)
@@ -107,4 +107,4 @@ if __name__ == '__main__':
         'http://www.bing.com/images/search?q=leukonychia+nail+disease')
   print(my_set)
 
-  download_images(my_set, 'white_spots')
+  download_images(my_set, 'leukonychia_nail_disease')
