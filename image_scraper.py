@@ -1,3 +1,4 @@
+import hashlib
 from HTMLParser import HTMLParser
 import urllib2
 import urllib
@@ -7,7 +8,6 @@ import os
 
 
 class ImageScraper(HTMLParser):
-
     num_recursions = 0
     links = set()
 
@@ -26,8 +26,8 @@ class ImageScraper(HTMLParser):
 
                         print(value)
                         is_image = value[-4:] == '.jpg' or \
-                            value[-4:] == '.png' or \
-                            value[-5:] == '.jpeg'
+                                   value[-4:] == '.png' or \
+                                   value[-5:] == '.jpeg'
                         if is_image:
 
                             ImageScraper.links.add(value)
@@ -75,20 +75,8 @@ def download_images(image_links, folder_name):
     if not os.path.exists('raw/{}'.format(folder_name)):
         os.makedirs('raw/{}'.format(folder_name))
 
-    for i, link in enumerate(image_links):
-        full_name = 'raw/{}/image{}'.format(folder_name, i)
-
-        
-def download_images(image_links, folder_name):
-    opener = urllib2.build_opener()
-    opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
-    urllib2.install_opener(opener)
-
-    if not os.path.exists('raw/{}'.format(folder_name)):
-        os.makedirs('raw/{}'.format(folder_name))
-
-    for i, link in enumerate(image_links):
-        full_name = 'raw/{}/image{}'.format(folder_name, i)
+    for link in image_links:
+        full_name = 'raw/{}/{}'.format(folder_name, hashlib.md5(os.path.splitext(link)[0]).hexdigest())
 
         if full_name[-4:] == '.png':
             full_name += '.png'
@@ -101,10 +89,9 @@ def download_images(image_links, folder_name):
             print('generic exception: ' + traceback.format_exc())
 
 
-
 if __name__ == '__main__':
-  my_set = gather_image_links(
+    my_set = gather_image_links(
         'http://www.bing.com/images/search?q=leukonychia+nail+disease')
-  print(my_set)
+    print(my_set)
 
-  download_images(my_set, 'leukonychia_nail_disease')
+    download_images(my_set, 'white_spots')
