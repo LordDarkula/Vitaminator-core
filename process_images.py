@@ -50,14 +50,17 @@ def get_images(dir_path, image_dir, np_dir):
             if file_type in IMAGE_FILE_TYPES:
                 try:
                     img = Image.open(curr)
-                    hash = hashlib.md5(os.path.splitext(curr)[0]).hexdigest()
-                    base_path = str(hash)
+                    base_path = str(hash_name(curr))
                     image_path = image_dir + base_path + '.jpg'
                     img = img.resize((width, height))
                     img.save(image_path)
                     # save_to_np(image_path, np_dir + base_path)
                 except Exception:
                     print('exception occured')
+
+
+def hash_name(curr):
+    return hashlib.md5(os.path.splitext(curr)[0]).hexdigest()
 
 
 def get_multiple_list(dirs):
