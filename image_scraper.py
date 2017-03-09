@@ -8,7 +8,8 @@ import os
 
 
 class ImageScraper(HTMLParser):
-    num_recursions = 0
+
+    num_recursions = 100
     links = set()
 
     def __init__(self, base_url):
@@ -19,27 +20,49 @@ class ImageScraper(HTMLParser):
         print(message)
 
     def handle_starttag(self, tag, attrs):
+        if tag == 'div':
+            for (attr, value) in attrs:
+                if attr == 'data-item-id':
+                    print "data item found"
+                    new_url = self.base_url[:-1] \
+                        if self.base_url[-1] == '_' \
+                        else self.base_url
+
+                    new_url += value
+
+                    self.num_recursions -= 1
+                    if self.num_recursions > 0:
+                        print("recursion " + self.num_recursions)
+                        gather_image_links(new_url)
+
         if tag == 'a':
             for (attr, value) in attrs:
                 if attr == 'href' or attr == 'data-href':
                     if len(value) > 4:
 
-                        print(value)
                         is_image = value[-4:] == '.jpg' or \
-                                   value[-4:] == '.png' or \
-                                   value[-5:] == '.jpeg'
+                            value[-4:] == '.png' or \
+                            value[-5:] == '.jpeg'
                         if is_image:
 
                             ImageScraper.links.add(value)
-                        elif ImageScraper.num_recursions < 100:
-                            ImageScraper.num_recursions += 1
-                            print(ImageScraper.num_recursions)
-                            gather_image_links(value)
 
         if tag == 'img':
             for (attr, value) in attrs:
                 if attr == 'src':
                     ImageScraper.links.add(value)
+                if attr == 'name':
+                    print "data item found"
+                    new_url = self.base_url[:-1] \
+                        if self.base_url[-1] == '_' \
+                        else self.base_url
+
+                    new_url += value
+
+                    self.num_recursions -= 1
+                    if self.num_recursions > 0:
+                        print("recursion " + self.num_recursions)
+                        gather_image_links(new_url)
 
     def image_links(self):
         return self.links
@@ -48,15 +71,12 @@ class ImageScraper(HTMLParser):
 def gather_image_links(base_url):
     html_string = ''
     try:
-        print("TRYING")
-
         req = urllib2.Request(base_url, headers={'User-Agent': 'Mozilla/5.0'})
 
         response = urlopen(req)
         # if response.getheader('content-type') == 'text/html':
         html_bytes = response.read()
         html_string = html_bytes.decode('utf-8')
-        print('<a' in html_string)
 
         finder = ImageScraper(base_url=base_url)
         finder.feed(data=html_string)
@@ -76,7 +96,8 @@ def download_images(image_links, folder_name):
         os.makedirs('raw/{}'.format(folder_name))
 
     for link in image_links:
-        full_name = 'raw/{}/{}'.format(folder_name, hashlib.md5(os.path.splitext(link)[0]).hexdigest())
+        full_name = 'raw/{}/{}'.format(folder_name,
+                                       hashlib.md5(os.path.splitext(link)[0]).hexdigest())
 
         if full_name[-4:] == '.png':
             full_name += '.png'
@@ -90,8 +111,9 @@ def download_images(image_links, folder_name):
 
 
 if __name__ == '__main__':
-    my_set = gather_image_links(
-        'http://www.bing.com/images/search?q=leukonychia+nail+disease')
+    url = raw_input("Image url: ")
+    my_set = gather_image_links(url)
     print(my_set)
+    print(len(my_set))
 
-    download_images(my_set, 'white_spots')
+    download_images(my_set, 'healthy_nails')
