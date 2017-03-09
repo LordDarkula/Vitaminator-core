@@ -71,12 +71,15 @@ def get_multiple_list(dirs):
 
 
 if __name__ == '__main__':
-    # get_multiple_list(['leukonychia_nail_disease'])
+    # get_multiple_list(['healthy_nails_news/'])
     # get_multiple_list(['Leukonychia _ Google Search/', 'calcium deficiency nails _ Google Search/',
     #                    'healthy_natural_nails/', 'leukonychia_nail_new/',
     #                    'natural_nails_new/', 'new_images_white_spot/', 'white_spot_on_nails_new/'])
-    remove_duplicates('new_images/')
-
+    # remove_duplicates('images/')
+    print os.listdir('new_images/healthy_nails_news/')
+    list = ['042969c6af5d001b0b39d41d55eed31f.jpg', '149aba9425fda1e1f97b83746cda3165.jpg',
+            '152bd7b6e3957bda5b0c450208209d03.jpg', '17475578e619a7c7b55cc6c9e6ce780e.jpg',
+            '174907f7f949e5f778329aa0d30a7902.jpg', '174a98209ddbba43d5ab408c218856b3.jpg',]
     # get_multiple_list(['white_spot_nails/', 'healthy/'])
     # get_multiple_list(['white_spot_nails'])
     # convert_images(paths)
