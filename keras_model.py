@@ -19,19 +19,22 @@ def create_dir(image_dir):
 def randomly_assign_train_test(img_path, test_size=0.1):
     features = []
     fullpath = {}
-    dirs = {}
+    dirs = []
     # # for i in os.listdir('output_arrs/'):
-    for i, dir in enumerate(listdir(img_path)):
-        curr_dir = join(img_path, dir)
-        if dir != ".DS_Store":
-            dirs[str(i)] = dir
-            create_dir('data/train/' + dir)
-            create_dir('data/validation/' + dir)
+    img_list = listdir(img_path)
+    if img_list.__contains__('.DS_Store'):
+        img_list.pop()
+    for i, dir_type in enumerate(img_list):
+        curr_dir = join(img_path, dir_type)
+        dirs.append(dir_type)
 
-            for file in listdir(curr_dir):
-                if file != ".DS_Store":
-                    features.append([file, i])
-                    fullpath[file] = join(curr_dir, file)
+        create_dir('data/train/' + dir_type)
+        create_dir('data/validation/' + dir_type)
+
+        for file in listdir(curr_dir):
+            if file != ".DS_Store":
+                features.append([file, i])
+                fullpath[file] = join(curr_dir, file)
 
     shuffle(features)
     features = np.array(features)
