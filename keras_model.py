@@ -1,4 +1,4 @@
-from os import listdir, makedirs
+import os
 from random import shuffle
 
 import numpy as np
@@ -7,63 +7,54 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
-from os.path import join, exists
 
 
 def create_dir(image_dir):
-    if not exists(image_dir):
+    if not os.path.exists(image_dir):
         print("Directory Created", image_dir)
-        makedirs(image_dir)
+        os.makedirs(image_dir)
+
+
+def list_files(path):
+    for file_or_dir in os.listdir(path):
+        if file_or_dir[0] != '.':
+            yield file_or_dir
 
 
 def randomly_assign_train_test(img_path, test_size=0.1):
-    features = []
-    fullpath = {}
-    dirs = []
+    # Stores path to image and label
+    data = []
+
+    os.chdir(img_path)
     # # for i in os.listdir('output_arrs/'):
-    img_list = listdir(img_path)
-    if img_list.__contains__('.DS_Store'):
-        img_list.pop()
-    for i, dir_type in enumerate(img_list):
-        curr_dir = join(img_path, dir_type)
-        dirs.append(dir_type)
+    for label, dir_name in enumerate(list_files(img_path)):
+        train_url, test_url = 'data/train/', 'data/validation/'
+        create_dir(os.path.join(test_url, dir_name))
+        create_dir(os.path.join(train_url, dir_name))
 
-        create_dir('data/train/' + dir_type)
-        create_dir('data/validation/' + dir_type)
+        os.chdir(dir_name)
 
-        for file in listdir(curr_dir):
-            if file != ".DS_Store":
-                features.append([file, i])
-                fullpath[file] = join(curr_dir, file)
+        for image_name in list_files(os.getcwd()):
+            data.append({'startpath': os.path.join(os.getcwd(), image_name),
+                         'trainpath': os.path.join(train_url, image_name),
+                         'testpath': os.path.join(test_url, image_name)})
 
-    shuffle(features)
-    features = np.array(features)
-    np.random.shuffle(features)
+        os.chdir('../')
 
-    testing_size = int(test_size * len(features))
+    shuffle(data)
 
-    train_x = list(features[:, 0][:-testing_size])
-    train_y = list(features[:, 1][:-testing_size])
-    test_x = list(features[:, 0][-testing_size:])
-    test_y = list(features[:, 1][-testing_size:])
+    testing_size = int(test_size * len(data))
 
-    print("The Dictionary:", dirs)
-    for i, val in enumerate(train_x):
-        img = Image.open(fullpath[val])
-        print("Answer", dirs[train_y[i]])
-        print("File Created", fullpath[val], 'data/train/' + join(dirs[train_y[i]], val))
-        img.save('data/train/' + join(dirs[train_y[i]], val))
+    train_data = data[testing_size:]
+    test_data = data[:testing_size]
 
-    for i, val in enumerate(test_x):
-        img = Image.open(fullpath[val])
-        print("Answer", dirs[test_y[i]])
-        print("File Created", fullpath[val], 'data/validation/' + join(dirs[test_y[i]], val))
-        img.save('data/validation/' + join(dirs[test_y[i]], val))
+    for image_path_dict in train_data:
+        img = Image.open(image_path_dict['startpath'])
+        img.save(image_path_dict['trainpath'])
 
-    return train_y, test_y
-
-
-# randomly_assign_train_test(img_path='images/')
+    for image_path_dict in test_data:
+        img = Image.open(image_path_dict['startpath'])
+        img.save(image_path_dict['testpath'])
 
 
 def run_model():
