@@ -47,15 +47,15 @@ def randomly_assign_train_test(img_path, test_size=0.1):
     print("The Dictionary:", dirs)
     for i, val in enumerate(train_x):
         img = Image.open(fullpath[val])
-        print("Answer",dirs[train_y[i]])
+        print("Answer", dirs[train_y[i]])
         print("File Created", fullpath[val], 'data/train/' + join(dirs[train_y[i]], val))
         img.save('data/train/' + join(dirs[train_y[i]], val))
 
     for i, val in enumerate(test_x):
         img = Image.open(fullpath[val])
-        print("Answer", dirs[train_y[i]])
-        print("File Created", fullpath[val], 'data/validation/' + join(dirs[train_y[i]], val))
-        img.save('data/validation/' + join(dirs[train_y[i]], val))
+        print("Answer", dirs[test_y[i]])
+        print("File Created", fullpath[val], 'data/validation/' + join(dirs[test_y[i]], val))
+        img.save('data/validation/' + join(dirs[test_y[i]], val))
 
     return train_y, test_y
 
