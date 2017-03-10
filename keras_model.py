@@ -19,18 +19,23 @@ def create_dir(image_dir):
 def randomly_assign_train_test(img_path, test_size=0.1):
     features = []
     fullpath = {}
-    dirs = {}
+    dirs = []
     # # for i in os.listdir('output_arrs/'):
-    for i, dir in enumerate(listdir(img_path)):
-        curr_dir = join(img_path, dir)
-        if dir != ".DS_Store":
-            dirs[str(i)] = dir
-            create_dir('data/train/' + dir)
-            create_dir('data/validation/' + dir)
-            for file in listdir(curr_dir):
-                if file != ".DS_Store":
-                    features.append([file, i])
-                    fullpath[file] = join(curr_dir, file)
+    img_list = listdir(img_path)
+    if img_list.__contains__('.DS_Store'):
+        img_list.pop()
+    for i, dir_type in enumerate(img_list):
+        curr_dir = join(img_path, dir_type)
+        dirs.append(dir_type)
+
+        create_dir('data/train/' + dir_type)
+        create_dir('data/validation/' + dir_type)
+
+        for file in listdir(curr_dir):
+            if file != ".DS_Store":
+                features.append([file, i])
+                fullpath[file] = join(curr_dir, file)
+
     shuffle(features)
     features = np.array(features)
     np.random.shuffle(features)
@@ -41,17 +46,20 @@ def randomly_assign_train_test(img_path, test_size=0.1):
     train_y = list(features[:, 1][:-testing_size])
     test_x = list(features[:, 0][-testing_size:])
     test_y = list(features[:, 1][-testing_size:])
+
     print("The Dictionary:", dirs)
     for i, val in enumerate(train_x):
         img = Image.open(fullpath[val])
-        print("Answer", train_y[i])
-        print("File Created", fullpath[val], 'data/train/' + join(dirs[train_y[i]], val),)
+        print("Answer", dirs[train_y[i]])
+        print("File Created", fullpath[val], 'data/train/' + join(dirs[train_y[i]], val))
         img.save('data/train/' + join(dirs[train_y[i]], val))
+
     for i, val in enumerate(test_x):
         img = Image.open(fullpath[val])
-        print("Answer", train_y[i])
-        print("File Created", fullpath[val], 'data/train/' + join(dirs[train_y[i]], val),)
-        img.save('data/validation/' + join(dirs[train_y[i]], val))
+        print("Answer", dirs[test_y[i]])
+        print("File Created", fullpath[val], 'data/validation/' + join(dirs[test_y[i]], val))
+        img.save('data/validation/' + join(dirs[test_y[i]], val))
+
     return train_y, test_y
 
 
@@ -62,16 +70,16 @@ def run_model():
     # dimensions of our images.
     img_width, img_height = 130, 130
 
-    train_data_dir = 'data/train'
-    validation_data_dir = 'data/validation'
+    train_data_dir = 'data/train/'
+    validation_data_dir = 'data/validation/'
     nb_train_samples = 1188
     nb_validation_samples = 134
     nb_epoch = 500
 
     model = Sequential()
-    model.add(Convolution2D(32, 3, 3, input_shape=(3, img_width, img_height)))
+    model.add(Convolution2D(32, 3, 3, input_shape=(img_width, img_height, 3), dim_ordering="tf"))
     model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(MaxPooling2D(pool_size=(2, 2), dim_ordering="tf"))
 
     model.add(Convolution2D(32, 3, 3))
     model.add(Activation('relu'))
@@ -126,4 +134,5 @@ def run_model():
 
 
 if __name__ == '__main__':
-    run_model()
+    # run_model()
+    randomly_assign_train_test('images/')
