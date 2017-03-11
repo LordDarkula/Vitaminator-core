@@ -25,21 +25,21 @@ def randomly_assign_train_test(img_path, test_size=0.1):
     # Stores path to image and label
     data = []
 
-    os.chdir(img_path)
     # # for i in os.listdir('output_arrs/'):
     for label, dir_name in enumerate(list_files(img_path)):
-        train_url, test_url = 'data/train/', 'data/validation/'
-        create_dir(os.path.join(test_url, dir_name))
-        create_dir(os.path.join(train_url, dir_name))
+        train_url = os.path.join('data/train/', dir_name)
+        test_url = os.path.join('data/validation/', dir_name)
+        create_dir(train_url)
+        create_dir(test_url)
 
-        os.chdir(dir_name)
+        os.chdir(os.path.join(img_path, dir_name))
 
         for image_name in list_files(os.getcwd()):
             data.append({'startpath': os.path.join(os.getcwd(), image_name),
                          'trainpath': os.path.join(train_url, image_name),
                          'testpath': os.path.join(test_url, image_name)})
 
-        os.chdir('../')
+        os.chdir('../../')
 
     shuffle(data)
 
@@ -51,10 +51,14 @@ def randomly_assign_train_test(img_path, test_size=0.1):
     for image_path_dict in train_data:
         img = Image.open(image_path_dict['startpath'])
         img.save(image_path_dict['trainpath'])
+        print("File created {} {}".format(image_path_dict['startpath'],
+                                          image_path_dict['trainpath']))
 
     for image_path_dict in test_data:
         img = Image.open(image_path_dict['startpath'])
         img.save(image_path_dict['testpath'])
+        print("File created {} {}".format(image_path_dict['startpath'],
+                                          image_path_dict['testpath']))
 
 
 def run_model():
@@ -126,4 +130,4 @@ def run_model():
 
 if __name__ == '__main__':
     # run_model()
-    randomly_assign_train_test('images/')
+    randomly_assign_train_test('images')
