@@ -74,7 +74,7 @@ def run_model():
 
 if __name__ == '__main__':
     randomly_assign_train_test('images/')
-    run_model()
+    # run_model()
     # randomly_assign_train_test('images/')
     # run_model()
     # randomly_assign_train_test('images')
