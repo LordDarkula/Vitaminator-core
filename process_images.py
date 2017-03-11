@@ -28,14 +28,14 @@ def remove_duplicates(dir, size=1):
                 items.append(curr)
             else:
                 file = items[unique.index(filehash)]
-                print "Duplicates Found"
+                print("Duplicates Found")
                 os.remove(curr)
 
 
-def save_to_np(image_path, name):
-    arr = np.array(Image.open(image_path).convert(img_type))
-    arr = np.reshape(arr, (width * height, image_ndim))
-    np.save(name, arr=arr)
+def convert_to_np(image_path):
+    arr = np.array(Image.open(image_path))
+    arr = np.reshape(arr, (width * height))
+    return arr
 
 
 def get_images(dir_path, image_dir, np_dir):

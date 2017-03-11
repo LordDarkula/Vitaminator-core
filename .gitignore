@@ -1,3 +1,7 @@
+*.pyc
+*.DS_Store
+*.npy
+data/
 images/
 new_images/
 output_arrs/
