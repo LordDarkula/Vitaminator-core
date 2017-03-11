@@ -1,64 +1,8 @@
-import os
-from random import shuffle
-
-import numpy as np
-from PIL import Image
+from process_images import randomly_assign_train_test
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
-
-
-def create_dir(image_dir):
-    if not os.path.exists(image_dir):
-        print("Directory Created", image_dir)
-        os.makedirs(image_dir)
-
-
-def list_files(path):
-    for file_or_dir in os.listdir(path):
-        if file_or_dir[0] != '.':
-            yield file_or_dir
-
-
-def randomly_assign_train_test(img_path, test_size=0.1):
-    # Stores path to image and label
-    data = []
-
-    # # for i in os.listdir('output_arrs/'):
-    for label, dir_name in enumerate(list_files(img_path)):
-        train_url = os.path.join('data/train/', dir_name)
-        test_url = os.path.join('data/validation/', dir_name)
-        create_dir(train_url)
-        create_dir(test_url)
-
-        os.chdir(os.path.join(img_path, dir_name))
-
-        for image_name in list_files(os.getcwd()):
-            data.append({'startpath': os.path.join(os.getcwd(), image_name),
-                         'trainpath': os.path.join(train_url, image_name),
-                         'testpath': os.path.join(test_url, image_name)})
-
-        os.chdir('../../')
-
-    shuffle(data)
-
-    testing_size = int(test_size * len(data))
-
-    train_data = data[testing_size:]
-    test_data = data[:testing_size]
-
-    for image_path_dict in train_data:
-        img = Image.open(image_path_dict['startpath'])
-        img.save(image_path_dict['trainpath'])
-        print("File created {} {}".format(image_path_dict['startpath'],
-                                          image_path_dict['trainpath']))
-
-    for image_path_dict in test_data:
-        img = Image.open(image_path_dict['startpath'])
-        img.save(image_path_dict['testpath'])
-        print("File created {} {}".format(image_path_dict['startpath'],
-                                          image_path_dict['testpath']))
 
 
 def run_model():
@@ -129,5 +73,8 @@ def run_model():
 
 
 if __name__ == '__main__':
+    randomly_assign_train_test('images/')
+    run_model()
+    # randomly_assign_train_test('images/')
     # run_model()
-    randomly_assign_train_test('images')
+    # randomly_assign_train_test('images')

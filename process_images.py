@@ -1,3 +1,5 @@
+from random import shuffle
+
 import numpy as np
 import os
 from PIL import Image
@@ -19,7 +21,8 @@ def remove_duplicates(dir, size=1):
         if os.path.isdir(curr):
             remove_duplicates(curr, size=size)
         if os.path.isfile(curr) and filename != ".DS_Store":
-            filehash = np.array(Image.open(curr)).tolist()
+            img = Image.open(curr)
+            filehash = np.array(img).tolist()
             if filehash not in unique:
                 unique.append(filehash)
                 items.append(curr)
@@ -54,7 +57,7 @@ def get_images(dir_path, image_dir, np_dir):
                     image_path = image_dir + base_path + '.jpg'
                     img = img.resize((width, height))
                     img.save(image_path)
-                    # save_to_np(image_path, np_dir + base_path)
+                    save_to_np(image_path, np_dir + base_path)
                 except Exception:
                     print('exception occured')
 
@@ -70,6 +73,60 @@ def get_multiple_list(dirs):
                    np_dir='output_arrs/' + dir)
 
 
+def list_files(path):
+    for file_or_dir in os.listdir(path):
+        if file_or_dir[0] != '.':
+            yield file_or_dir
+
+
+def randomly_assign_train_test(img_path, test_size=0.1):
+    # Stores path to image and label
+    data = []
+
+    # # for i in os.listdir('output_arrs/'):
+    for label, dir_name in enumerate(list_files(img_path)):
+        train_url = os.path.join('data/train/', dir_name)
+        test_url = os.path.join('data/validation/', dir_name)
+        create_dir(train_url)
+        create_dir(test_url)
+
+        os.chdir(os.path.join(img_path, dir_name))
+
+        for image_name in list_files(os.getcwd()):
+            data.append({'startpath': os.path.join(os.getcwd(), image_name),
+                         'trainpath': os.path.join(train_url, image_name),
+                         'testpath': os.path.join(test_url, image_name)})
+
+        os.chdir('../../')
+
+    shuffle(data)
+
+    testing_size = int(test_size * len(data))
+
+    train_data = data[testing_size:]
+    test_data = data[:testing_size]
+
+    for image_path_dict in train_data:
+        img = Image.open(image_path_dict['startpath'])
+        img = img.convert('1')
+        img.save(image_path_dict['trainpath'])
+        print("File created {} {}".format(image_path_dict['startpath'],
+                                          image_path_dict['trainpath']))
+
+    for image_path_dict in test_data:
+        img = Image.open(image_path_dict['startpath'])
+        img = img.convert('1')
+        img.save(image_path_dict['testpath'])
+        print("File created {} {}".format(image_path_dict['startpath'],
+                                          image_path_dict['testpath']))
+
+
+def create_dir(image_dir):
+    if not os.path.exists(image_dir):
+        print("Directory Created", image_dir)
+        os.makedirs(image_dir)
+
+
 if __name__ == '__main__':
     # get_multiple_list(['healthy_nails_news/'])
     # get_multiple_list(['Leukonychia _ Google Search/', 'calcium deficiency nails _ Google Search/',
@@ -79,7 +136,7 @@ if __name__ == '__main__':
     print os.listdir('new_images/healthy_nails_news/')
     list = ['042969c6af5d001b0b39d41d55eed31f.jpg', '149aba9425fda1e1f97b83746cda3165.jpg',
             '152bd7b6e3957bda5b0c450208209d03.jpg', '17475578e619a7c7b55cc6c9e6ce780e.jpg',
-            '174907f7f949e5f778329aa0d30a7902.jpg', '174a98209ddbba43d5ab408c218856b3.jpg',]
+            '174907f7f949e5f778329aa0d30a7902.jpg', '174a98209ddbba43d5ab408c218856b3.jpg', ]
     # get_multiple_list(['white_spot_nails/', 'healthy/'])
     # get_multiple_list(['white_spot_nails'])
     # convert_images(paths)
