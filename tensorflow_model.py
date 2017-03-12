@@ -55,13 +55,13 @@ def build_model(image_size):
 
     y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
-    cross_entropy = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
+    optimizer = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    return train_step, accuracy
+    return optimizer, cross_entropy, accuracy
 
 
 if __name__ == '__main__':
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     train_X = np.reshape(train_X, [-1, 130 * 130])
     test_X = np.reshape(test_X, [-1, 130 * 130])
 
-    train_step, accuracy = build_model(130)
+    optimizer, cost, accuracy = build_model(130)
 
     batch_size = 20
     n_batches = (len(train_X) / batch_size) - 2
@@ -87,18 +87,31 @@ if __name__ == '__main__':
         print("Session starting")
 
         sess.run(tf.global_variables_initializer())
-        for i in range(n_batches):
-            print("On iteration number {}".format(i))
-            batch = (train_X[batch_size * i:batch_size * (i + 1)], train_y[batch_size * i:batch_size * (i + 1)])
-            train_accuracy = accuracy.eval(
-                    feed_dict={
-                        x: batch[0],
-                        y_: batch[1],
-                        keep_prob: 0.5}
-                )
 
-            print("step "+str(i) + ", training accuracy " + str(train_accuracy))
-            train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+        for epoch in range(500):
+            epoch_loss = 0
+            i = 0
+            for i in range(n_batches):
+                batch = (train_X[batch_size * i:batch_size * (i + 1)], train_y[batch_size * i:batch_size * (i + 1)])
+                _, c = sess.run([optimizer, cost], feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+                epoch_loss += c
+                i += batch_size
+                print("the loss of " + str(i) + "out of " + str(n_batches) + " is " + c)
 
-        print("test accuracy %g" % accuracy.eval(feed_dict={
-            x: test_X, y_: test_y, keep_prob: 1.0}))
+            print('Epoch', epoch + 1, 'completed out of', 500, 'loss:', epoch_loss)
+            print('Accuracy:', accuracy.eval({x: test_X, y_: test_y,keep_prob: 0.5}))
+
+            # print("On iteration number {}".format(i))
+            # train_accuracy = accuracy.eval(
+            #     feed_dict={
+            #         x: batch[0],
+            #         y_: batch[1],
+            #         keep_prob: 0.5}
+            # )
+            #
+            # print("step " + str(i) + ", training accuracy " + str(train_accuracy))
+            # optimizer.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+            #
+            # print("test accuracy %g" % accuracy.eval(feed_dict={
+            #     x: test_X, y_: test_y, keep_prob: 1.0}))
+
