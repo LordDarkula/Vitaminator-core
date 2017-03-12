@@ -33,8 +33,9 @@ def remove_duplicates(dir, size=1):
 
 
 def convert_to_np(image_path):
-    arr = np.array(Image.open(image_path).convert('1'))
+    arr = np.array(Image.open(image_path).convert('L'))
     arr = np.reshape(arr, (width * height))
+    arr = arr.astype(np.float32)
     return arr
 
 
