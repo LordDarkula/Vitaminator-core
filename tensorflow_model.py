@@ -64,8 +64,12 @@ def build_model(image_size):
     return optimizer, cross_entropy, accuracy
 
 
+def next_batch(batch_size, i, list):
+    return list[batch_size * i: batch_size * (i + 1)]
+
+
 if __name__ == '__main__':
-    # randomly_assign_train_test('images')
+    randomly_assign_train_test('images')
     train_X, train_y, test_X, test_y = save_images_to_arrays()
     train_X = np.reshape(train_X, (-1, 130, 130))
     test_X = np.reshape(test_X, (-1, 130, 130))
@@ -82,7 +86,7 @@ if __name__ == '__main__':
 
     batch_size = 20
     n_batches = (len(train_X) / batch_size) - 2
-
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         print("Session starting")
 
@@ -90,28 +94,32 @@ if __name__ == '__main__':
 
         for epoch in range(500):
             epoch_loss = 0
+            avg_cost = 0.
             i = 0
             for i in range(n_batches):
-                batch = (train_X[batch_size * i:batch_size * (i + 1)], train_y[batch_size * i:batch_size * (i + 1)])
-                _, c = sess.run([optimizer, cost], feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+                batch_x, batch_y = next_batch(batch_size, i, train_X), next_batch(batch_size, i, train_y)
+
+                # batch = (train_X[batch_size * i:batch_size * (i + 1)], train_y[batch_size * i:batch_size * (i + 1)])
+                _, c = sess.run([optimizer, cost], feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.5})
                 epoch_loss += c
-                i += batch_size
-                print("the loss of " + str(i) + "out of " + str(n_batches) + " is " + c)
+                avg_cost += c / n_batches
+                # i += batch_size
+                # print("the loss of " + str(i) + "out of " + str(n_batches) + " is " + str(c))
 
-            print('Epoch', epoch + 1, 'completed out of', 500, 'loss:', epoch_loss)
-            print('Accuracy:', accuracy.eval({x: test_X, y_: test_y,keep_prob: 0.5}))
+            print('Epoch', epoch + 1, 'completed out of', 500, 'loss:', epoch_loss, "cost:", avg_cost)
+        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: 0.5}))
+        saver.save(sess, 'my-model')
 
-            # print("On iteration number {}".format(i))
-            # train_accuracy = accuracy.eval(
-            #     feed_dict={
-            #         x: batch[0],
-            #         y_: batch[1],
-            #         keep_prob: 0.5}
-            # )
-            #
-            # print("step " + str(i) + ", training accuracy " + str(train_accuracy))
-            # optimizer.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
-            #
-            # print("test accuracy %g" % accuracy.eval(feed_dict={
-            #     x: test_X, y_: test_y, keep_prob: 1.0}))
-
+        # print("On iteration number {}".format(i))
+        # train_accuracy = accuracy.eval(
+        #     feed_dict={
+        #         x: batch[0],
+        #         y_: batch[1],
+        #         keep_prob: 0.5}
+        # )
+        #
+        # print("step " + str(i) + ", training accuracy " + str(train_accuracy))
+        # optimizer.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+        #
+        # print("test accuracy %g" % accuracy.eval(feed_dict={
+        #     x: test_X, y_: test_y, keep_prob: 1.0}))

@@ -2,6 +2,7 @@ import os
 import h5py
 import numpy as np
 from process_images import list_files, create_dir, convert_to_np
+
 # from keras.models import Sequential
 
 # path to the model weights file.
@@ -12,8 +13,6 @@ img_width, img_height = 130, 130
 
 train_data_dir = 'data/train'
 validation_data_dir = 'data/validation'
-nb_train_samples = 1188
-nb_validation_samples = 134
 nb_epoch = 500
 
 
@@ -40,18 +39,18 @@ def save_images_to_arrays():
 
     train_X, train_y = array_dict[train_data_dir]
     test_X, test_y = array_dict[validation_data_dir]
-    np.save('bottleneck_train_X', np.array(train_X))
-    np.save('bottleneck_train_y', np.array(train_y))
-    np.save('bottleneck_test_X', np.array(test_X))
-    np.save('bottleneck_test_y', np.array(test_y))
+    np.save('bottleneck/bottleneck_train_X', np.array(train_X))
+    np.save('bottleneck/bottleneck_train_y', np.array(train_y))
+    np.save('bottleneck/bottleneck_test_X', np.array(test_X))
+    np.save('bottleneck/bottleneck_test_y', np.array(test_y))
     return np.array(train_X), np.array(train_y), np.array(test_X), np.array(test_y)
 
 
 def train_top_model():
-    train_X = np.load('bottleneck_train_X.npy')
-    train_y = np.load('bottleneck_train_y.npy')
-    test_X = np.load('bottleneck_test_X.npy')
-    test_y = np.load('bottleneck_test_y.npy')
+    train_X = np.load('bottleneck/bottleneck_train_X.npy')
+    train_y = np.load('bottleneck/bottleneck_train_y.npy')
+    test_X = np.load('bottleneck/bottleneck_test_X.npy')
+    test_y = np.load('bottleneck/bottleneck_test_y.npy')
 
     # model = Sequential()
     # model.add(Dense(256, activation='relu', input_shape=train_X.shape[1:]))
