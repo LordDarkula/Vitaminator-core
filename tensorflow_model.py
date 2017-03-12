@@ -1,7 +1,11 @@
 import tensorflow as tf
-
+import numpy as np
 from process_images import randomly_assign_train_test
 from bottleneck_keras import save_images_to_arrays
+
+x = tf.placeholder(tf.float32, shape=[None, 130 * 130])
+y_ = tf.placeholder(tf.float32, shape=[None, 2])
+keep_prob = tf.placeholder(tf.float32)
 
 
 def weight_variable(shape):
@@ -24,9 +28,6 @@ def max_pool_2x2(x):
 
 
 def build_model(image_size):
-    x = tf.placeholder(tf.float32, shape=[None, 130, 130])
-    y_ = tf.placeholder(tf.float32, shape=[None, 2])
-
     W_conv1 = weight_variable([5, 5, 1, 32])
     b_conv1 = bias_variable([32])
 
@@ -41,17 +42,16 @@ def build_model(image_size):
     h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
     h_pool2 = max_pool_2x2(h_conv2)
 
-    W_fc1 = weight_variable([image_size * image_size * 64, 1024])
+    W_fc1 = weight_variable([33 * 33 * 64, 1024])
     b_fc1 = bias_variable([1024])
-
-    h_pool2_flat = tf.reshape(h_pool2, [-1, image_size * image_size * 64])
+    print h_pool2.shape
+    h_pool2_flat = tf.reshape(h_pool2, [-1, 33 * 33 * 64])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
-    keep_prob = tf.placeholder(tf.float32)
     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-    W_fc2 = weight_variable([1024, 10])
-    b_fc2 = bias_variable([10])
+    W_fc2 = weight_variable([1024, 2])
+    b_fc2 = bias_variable([2])
 
     y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
@@ -65,12 +65,19 @@ def build_model(image_size):
 
 
 if __name__ == '__main__':
-    x = tf.placeholder(tf.float32, shape=[None, 130, 130])
-    y_ = tf.placeholder(tf.float32, shape=[None, 2])
-    keep_prob = tf.placeholder(tf.float32)
-
-    randomly_assign_train_test('images')
+    # randomly_assign_train_test('images')
     train_X, train_y, test_X, test_y = save_images_to_arrays()
+    train_X = np.reshape(train_X, (-1, 130, 130))
+    test_X = np.reshape(test_X, (-1, 130, 130))
+
+    train_X = train_X.astype(np.float32)
+    test_X = test_X.astype(np.float32)
+    train_y = train_y.astype(np.float32)
+    test_y = test_y.astype(np.float32)
+
+    train_X = np.reshape(train_X, [-1, 130 * 130])
+    test_X = np.reshape(test_X, [-1, 130 * 130])
+
     train_step, accuracy = build_model(130)
 
     batch_size = 20
@@ -82,11 +89,15 @@ if __name__ == '__main__':
         sess.run(tf.global_variables_initializer())
         for i in range(n_batches):
             print("On iteration number {}".format(i))
-            batch = (train_X[batch_size * i:batch_size * [i + 1]])
-            if i % 10 == 0:
-                train_accuracy = accuracy.eval(feed_dict={
-                    x: batch[0], y_: batch[1], keep_prob: 1.0})
-                print("step %d, training accuracy %g" % (i, train_accuracy))
+            batch = (train_X[batch_size * i:batch_size * (i + 1)], train_y[batch_size * i:batch_size * (i + 1)])
+            train_accuracy = accuracy.eval(
+                    feed_dict={
+                        x: batch[0],
+                        y_: batch[1],
+                        keep_prob: 0.5}
+                )
+
+            print("step "+str(i) + ", training accuracy " + str(train_accuracy))
             train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
         print("test accuracy %g" % accuracy.eval(feed_dict={
