@@ -38,7 +38,8 @@ def save_images_to_arrays():
             for image in list_files(os.path.join(train_or_test_dir, class_dir)):
                 image_path = os.path.join(train_or_test_dir, class_dir, image)
                 array_dict[train_or_test_dir][0].append(convert_to_np(image_path))
-                array_dict[train_or_test_dir][1].append(label)
+                one_hot = [0, 1] if label == 0 else [1, 0]
+                array_dict[train_or_test_dir][1].append(one_hot)
 
     train_X, train_y = array_dict[train_data_dir]
     test_X, test_y = array_dict[validation_data_dir]
@@ -47,6 +48,7 @@ def save_images_to_arrays():
     np.save('bottleneck_train_y', np.array(train_y))
     np.save('bottleneck_test_X', np.array(test_X))
     np.save('bottleneck_test_y', np.array(test_y))
+    return train_X, train_y, test_X, test_y
 
 
 def train_top_model():
