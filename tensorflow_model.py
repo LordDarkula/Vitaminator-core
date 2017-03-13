@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from process_images import randomly_assign_train_test
 from bottleneck_keras import save_images_to_arrays
+from tqdm import tqdm
 
 x = tf.placeholder(tf.float32, shape=[None, 130 * 130])
 y_ = tf.placeholder(tf.float32, shape=[None, 2])
@@ -61,14 +62,14 @@ def build_model(image_size):
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    return optimizer, cross_entropy, accuracy
+    return optimizer, cross_entropy, accuracy, correct_prediction
 
 
 def next_batch(batch_size, i, list):
     return list[batch_size * i: batch_size * (i + 1)]
 
 
-if __name__ == '__main__':
+def run_tensorflow_model():
     randomly_assign_train_test('images')
     train_X, train_y, test_X, test_y = save_images_to_arrays()
     train_X = np.reshape(train_X, (-1, 130, 130))
@@ -82,7 +83,7 @@ if __name__ == '__main__':
     train_X = np.reshape(train_X, [-1, 130 * 130])
     test_X = np.reshape(test_X, [-1, 130 * 130])
 
-    optimizer, cost, accuracy = build_model(130)
+    optimizer, cost, accuracy, correct_prediction = build_model(130)
 
     batch_size = 20
     n_batches = (len(train_X) / batch_size) - 2
@@ -108,7 +109,7 @@ if __name__ == '__main__':
 
             print('Epoch', epoch + 1, 'completed out of', 500, 'loss:', epoch_loss, "cost:", avg_cost)
         print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: 0.5}))
-        saver.save(sess, 'my-model')
+        saver.save(sess, 'model/my-model')
 
         # print("On iteration number {}".format(i))
         # train_accuracy = accuracy.eval(
@@ -123,3 +124,15 @@ if __name__ == '__main__':
         #
         # print("test accuracy %g" % accuracy.eval(feed_dict={
         #     x: test_X, y_: test_y, keep_prob: 1.0}))
+
+
+def restore_model():
+
+    with tf.Session() as sess:
+        new_saver = tf.train.import_meta_graph('model/my-model.meta')
+        new_saver.restore(sess, tf.train.latest_checkpoint('./'))
+
+
+if __name__ == '__main__':
+    # run_tensorflow_model()
+    restore_model()

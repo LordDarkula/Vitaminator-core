@@ -84,6 +84,7 @@ def randomly_assign_train_test(img_path, test_size=0.1, remove_data_folder=False
     # Stores path to image and label
     if os.path.exists('data'):
         if remove_data_folder:
+            print("Data Folder Removed")
             os.remove('data')
         else:
             return
