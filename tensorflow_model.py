@@ -77,6 +77,7 @@ def run_tensorflow_model():
     batch_size = 20
     n_batches = (len(train_X) / batch_size) - 2
     saver = tf.train.Saver()
+
     with tf.Session() as sess:
         print("Session starting")
 
