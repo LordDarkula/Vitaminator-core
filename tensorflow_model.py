@@ -65,23 +65,12 @@ def build_model(image_size):
     return optimizer, cross_entropy, accuracy, correct_prediction
 
 
-def next_batch(batch_size, i, list):
-    return list[batch_size * i: batch_size * (i + 1)]
+def next_batch(batch_size, i, data):
+    return data[batch_size * i: batch_size * (i + 1)]
 
 
 def run_tensorflow_model():
-    randomly_assign_train_test('images')
     train_X, train_y, test_X, test_y = save_images_to_arrays()
-    train_X = np.reshape(train_X, (-1, 130, 130))
-    test_X = np.reshape(test_X, (-1, 130, 130))
-
-    train_X = train_X.astype(np.float32)
-    test_X = test_X.astype(np.float32)
-    train_y = train_y.astype(np.float32)
-    test_y = test_y.astype(np.float32)
-
-    train_X = np.reshape(train_X, [-1, 130 * 130])
-    test_X = np.reshape(test_X, [-1, 130 * 130])
 
     optimizer, cost, accuracy, correct_prediction = build_model(130)
 
@@ -134,5 +123,9 @@ def restore_model():
 
 
 if __name__ == '__main__':
+    # If
+    randomly_assign_train_test('images')
+    run_tensorflow_model()
+
     # run_tensorflow_model()
     restore_model()

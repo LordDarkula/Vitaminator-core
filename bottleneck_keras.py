@@ -1,5 +1,4 @@
 import os
-import h5py
 import numpy as np
 from process_images import list_files, create_dir, convert_to_np
 
