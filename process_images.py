@@ -33,8 +33,9 @@ def remove_duplicates(dir, size=1):
 
 
 def convert_to_np(image_path):
-    arr = np.array(Image.open(image_path))
+    arr = np.array(Image.open(image_path).convert('L'))
     arr = np.reshape(arr, (width * height))
+    arr = arr.astype(np.float32)
     return arr
 
 
@@ -57,7 +58,7 @@ def get_images(dir_path, image_dir, np_dir):
                     image_path = image_dir + base_path + '.jpg'
                     img = img.resize((width, height))
                     img.save(image_path)
-                    save_to_np(image_path, np_dir + base_path)
+                    # convert_to_np(image_path, np_dir + base_path)
                 except Exception:
                     print('exception occured')
 
@@ -79,8 +80,13 @@ def list_files(path):
             yield file_or_dir
 
 
-def randomly_assign_train_test(img_path, test_size=0.1):
+def randomly_assign_train_test(img_path, test_size=0.1, remove_data_folder=False):
     # Stores path to image and label
+    if os.path.exists('data'):
+        if remove_data_folder:
+            os.remove('data')
+        else:
+            return
     data = []
 
     # # for i in os.listdir('output_arrs/'):
@@ -108,14 +114,14 @@ def randomly_assign_train_test(img_path, test_size=0.1):
 
     for image_path_dict in train_data:
         img = Image.open(image_path_dict['startpath'])
-        img = img.convert('1')
+        img = img.convert('L')
         img.save(image_path_dict['trainpath'])
         print("File created {} {}".format(image_path_dict['startpath'],
                                           image_path_dict['trainpath']))
 
     for image_path_dict in test_data:
         img = Image.open(image_path_dict['startpath'])
-        img = img.convert('1')
+        img = img.convert('L')
         img.save(image_path_dict['testpath'])
         print("File created {} {}".format(image_path_dict['startpath'],
                                           image_path_dict['testpath']))
