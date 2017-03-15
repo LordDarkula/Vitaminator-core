@@ -6,9 +6,10 @@ from urllib2 import urlopen
 import traceback
 import os
 
+import re
+
 
 class ImageScraper(HTMLParser):
-
     num_recursions = 100
     links = set()
 
@@ -41,10 +42,9 @@ class ImageScraper(HTMLParser):
                     if len(value) > 4:
 
                         is_image = value[-4:] == '.jpg' or \
-                            value[-4:] == '.png' or \
-                            value[-5:] == '.jpeg'
+                                   value[-4:] == '.png' or \
+                                   value[-5:] == '.jpeg'
                         if is_image:
-
                             ImageScraper.links.add(value)
 
         if tag == 'img':
@@ -66,6 +66,16 @@ class ImageScraper(HTMLParser):
 
     def image_links(self):
         return self.links
+
+
+def check_validity(html, allowed):
+    html = html.lower()
+    regex = ""
+    for word in allowed:
+        word = word.lower()
+        regex += "(?=" + word + ")"
+    filted_words = [m.start() for m in re.finditer(regex, html)]
+    return len(filted_words) > 0
 
 
 def gather_image_links(base_url):
