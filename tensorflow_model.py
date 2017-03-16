@@ -28,7 +28,7 @@ def conv_layer(X, W, b, name='conv'):
         tf.summary.histogram('activation', activation)
 
         return tf.nn.max_pool(activation, ksize=[1, 2, 2, 1],
-                              strides=[1, 1, 1, 1], padding='SAME')
+                              strides=[1, 2, 2, 1], padding='SAME')
 
 
 def fc_layer(X, n_features, W, b, name='fc'):
