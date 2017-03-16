@@ -42,12 +42,12 @@ def build_model(image_size):
     W_conv1 = weight_variable([5, 5, 1, 32])
     b_conv1 = bias_variable([32])
 
-    model = conv_layer(x_image, W_conv1, b_conv1)
+    model = conv_layer(x_image, W_conv1, b_conv1, name='conv1')
 
     W_conv2 = weight_variable([5, 5, 32, 64])
     b_conv2 = bias_variable([64])
 
-    model = conv_layer(model, W_conv2, b_conv2)
+    model = conv_layer(model, W_conv2, b_conv2, name='conv1')
 
     W_fc1 = weight_variable([33 * 33 * 64, 1024])
     b_fc1 = bias_variable([1024])
