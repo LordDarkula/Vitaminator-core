@@ -31,10 +31,9 @@ def conv_layer(X, W, b, name='conv'):
                               strides=[1, 2, 2, 1], padding='SAME')
 
 
-def fc_layer(X, n_features, W, b, name='fc'):
+def fc_layer(X, W, b, name='fc'):
     with tf.name_scope(name):
-        X_flat = tf.reshape(X, [-1, n_features])
-        return tf.nn.relu(tf.matmul(X_flat, W) + b)
+        return tf.nn.relu(tf.matmul(X, W) + b)
 
 
 def build_model(image_size):
@@ -50,16 +49,17 @@ def build_model(image_size):
 
     model = conv_layer(model, W_conv2, b_conv2)
 
-    W_fc1 = weight_variable([130 * 130 * 64, 1024])
+    W_fc1 = weight_variable([33 * 33 * 64, 1024])
     b_fc1 = bias_variable([1024])
 
-    model = fc_layer(model, (130 * 130 * 64), W_fc1, b_fc1)
+    model = tf.reshape(model, [-1, 33 * 33 * 64])
+    model = fc_layer(model, W_fc1, b_fc1)
     model = tf.nn.dropout(model, keep_prob)
 
     W_fc2 = weight_variable([1024, 2])
     b_fc2 = bias_variable([2])
 
-    y_conv = fc_layer(model, 1024, W_fc2, b_fc2)
+    y_conv = fc_layer(model, W_fc2, b_fc2)
 
     with tf.name_scope('cross_entropy'):
         cross_entropy = tf.reduce_mean(
@@ -103,6 +103,7 @@ def run_tensorflow_model():
             epoch_loss = 0
             avg_cost = 0.0
             for i in range(n_batches):
+                print('batch number: {}'.format(i))
                 batch_x, batch_y = next_batch(
                     batch_size, i, train_X), next_batch(batch_size, i, train_y)
 
