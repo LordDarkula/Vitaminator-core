@@ -3,8 +3,8 @@ from process_images import randomly_assign_train_test
 from bottleneck_keras import save_images_to_arrays
 
 
-x = tf.placeholder(tf.float32, shape=[None, 130 * 130])
-y_ = tf.placeholder(tf.float32, shape=[None, 2])
+x = tf.placeholder(tf.float32, shape=[None, 130 * 130], name='x_placeholder')
+y_ = tf.placeholder(tf.float32, shape=[None, 2], name='y_placeholder')
 keep_prob = tf.placeholder(tf.float32)
 
 
@@ -17,6 +17,7 @@ def bias_variable(shape):
     initial = tf.constant(0.1, shape=shape)
     return tf.Variable(initial, name='B')
 
+
 def conv_layer(X, W, b, name='conv'):
     with tf.name_scope(name):
         convolution = tf.nn.conv2d(X, W, strides=[1, 1, 1, 1], padding='SAME')
@@ -26,7 +27,9 @@ def conv_layer(X, W, b, name='conv'):
         tf.summary.histogram('biases', b)
         tf.summary.histogram('activation', activation)
 
-        return tf.nn.max_pool(activation, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
+        return tf.nn.max_pool(activation, ksize=[1, 2, 2, 1],
+                              strides=[1, 1, 1, 1], padding='SAME')
+
 
 def fc_layer(X, n_features, W, b, name='fc'):
     with tf.name_scope(name):
@@ -45,11 +48,7 @@ def build_model(image_size):
     W_conv2 = weight_variable([5, 5, 32, 64])
     b_conv2 = bias_variable([64])
 
-    print(model.shape)
-
     model = conv_layer(model, W_conv2, b_conv2)
-
-    print(model.shape)
 
     W_fc1 = weight_variable([130 * 130 * 64, 1024])
     b_fc1 = bias_variable([1024])
@@ -63,7 +62,8 @@ def build_model(image_size):
     y_conv = fc_layer(model, 1024, W_fc2, b_fc2)
 
     with tf.name_scope('cross_entropy'):
-        cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
+        cross_entropy = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
         tf.summary.scalar('cross_entropy', cross_entropy)
 
     with tf.name_scope('train'):
@@ -94,9 +94,8 @@ def run_tensorflow_model():
         print("Session starting")
 
         merged_summary = tf.summary.merge_all()
-        writer = tf.summary.FileWriter('/tmp/vitaminator/6')
+        writer = tf.summary.FileWriter('/tmp/vitaminator/7')
         writer.add_graph(sess.graph)
-
 
         sess.run(tf.global_variables_initializer())
 
@@ -104,18 +103,22 @@ def run_tensorflow_model():
             epoch_loss = 0
             avg_cost = 0.0
             for i in range(n_batches):
-                batch_x, batch_y = next_batch(batch_size, i, train_X), next_batch(batch_size, i, train_y)
+                batch_x, batch_y = next_batch(
+                    batch_size, i, train_X), next_batch(batch_size, i, train_y)
 
-                _, cross_entropy = sess.run([optimizer, cost], feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.5})
+                _, cross_entropy = sess.run([optimizer, cost], feed_dict={
+                                            x: batch_x, y_: batch_y, keep_prob: 0.5})
 
                 epoch_loss += cross_entropy
                 avg_cost += cross_entropy / n_batches
 
                 if i % 5 == 0:
-                    s = sess.run(merged_summary, feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.5})
+                    s = sess.run(merged_summary, feed_dict={
+                                 x: batch_x, y_: batch_y, keep_prob: 0.5})
                     writer.add_summary(s, i)
 
-            print('Epoch {} completed out of {}, loss: {}, cost: {}'.format(epoch + 1, 500, epoch_loss, avg_cost))
+            print('Epoch {} completed out of {}, loss: {}, cost: {}'.format(
+                epoch + 1, 500, epoch_loss, avg_cost))
 
         print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: 0.5}))
         saver.save(sess, 'model/my-model')
