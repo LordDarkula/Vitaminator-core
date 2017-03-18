@@ -77,7 +77,7 @@ def build_model(image_size):
     b_fc1_5 = bias_variable([1024])
     model = fc_layer(model, W_fc1_5, b_fc1_5)
 
-    model = tf.nn.dropout(model, keep_prob)
+    # model = tf.nn.dropout(model, keep_prob)
 
     W_fc1_6 = weight_variable([1024, 1024])
     b_fc1_6 = bias_variable([1024])
@@ -96,7 +96,7 @@ def build_model(image_size):
         tf.summary.scalar('cross_entropy', cross_entropy)
 
     with tf.name_scope('train'):
-        optimizer = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+        optimizer = tf.train.AdamOptimizer(LRNING_RATE).minimize(cross_entropy)
 
     with tf.name_scope('accuracy'):
         prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
@@ -143,9 +143,9 @@ def run_tensorflow_model():
 
             print('Epoch {} completed out of {}'.format(
                 epoch + 1, NUMBER_OF_EPOCHS, epoch_loss))
-            print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB}))
+            print('Accuracy: {}'.format(accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB})))
 
-        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB}))
+        print('Accuracy: {}'.format(accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB})))
 
         saver.save(sess, 'model/my-model')
 
