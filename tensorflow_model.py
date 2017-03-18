@@ -3,13 +3,13 @@ from process_images import randomly_assign_train_test
 from bottleneck_keras import save_images_to_arrays
 
 
-LRNING_RATE = 1e-4
-TRAIN_KEEP_PROB = 0.5
+LRNING_RATE = 1e-5
+TRAIN_KEEP_PROB = 0.7
 TEST_KEEP_PROB = 1
-TENSORBOARD_DIR = '/tmp/vitaminator/official22'
+TENSORBOARD_DIR = '/tmp/vitaminator/official23'
 
 BATCH_SIZE = 20
-NUMBER_OF_EPOCHS = 80
+NUMBER_OF_EPOCHS = 70
 
 x = tf.placeholder(tf.float32, shape=[None, 130 * 130], name='x_placeholder')
 y_ = tf.placeholder(tf.float32, shape=[None, 2], name='y_placeholder')
@@ -77,7 +77,7 @@ def build_model(image_size):
     b_fc1_5 = bias_variable([1024])
     model = fc_layer(model, W_fc1_5, b_fc1_5)
 
-    model = tf.nn.dropout(model, keep_prob)
+    # model = tf.nn.dropout(model, keep_prob)
 
     W_fc1_6 = weight_variable([1024, 1024])
     b_fc1_6 = bias_variable([1024])
@@ -96,7 +96,7 @@ def build_model(image_size):
         tf.summary.scalar('cross_entropy', cross_entropy)
 
     with tf.name_scope('train'):
-        optimizer = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+        optimizer = tf.train.AdamOptimizer(LRNING_RATE).minimize(cross_entropy)
 
     with tf.name_scope('accuracy'):
         prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
@@ -143,9 +143,9 @@ def run_tensorflow_model():
 
             print('Epoch {} completed out of {}'.format(
                 epoch + 1, NUMBER_OF_EPOCHS, epoch_loss))
-            print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB}))
+            print('Accuracy: {}'.format(accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB})))
 
-        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB}))
+        print('Accuracy: {}'.format(accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB})))
 
         saver.save(sess, 'model/my-model')
 
