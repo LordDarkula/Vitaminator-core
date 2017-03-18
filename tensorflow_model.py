@@ -5,7 +5,7 @@ from bottleneck_keras import save_images_to_arrays
 
 LRNING_RATE = 1e-4
 TRAIN_KEEP_PROB = 0.5
-TEST_KEEP_PROB = 0.5
+TEST_KEEP_PROB = 1
 TENSORBOARD_DIR = '/tmp/vitaminator/official22'
 
 BATCH_SIZE = 20
