@@ -85,7 +85,7 @@ def randomly_assign_train_test(img_path, test_size=0.1, remove_data_folder=False
     if os.path.exists('data'):
         if remove_data_folder:
             print("Data Folder Removed")
-            os.remove('data')
+            os.system('rm data')
         else:
             return
     data = []
