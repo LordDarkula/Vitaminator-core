@@ -47,13 +47,37 @@ def build_model(image_size):
     W_conv2 = weight_variable([5, 5, 32, 64])
     b_conv2 = bias_variable([64])
 
-    model = conv_layer(model, W_conv2, b_conv2, name='conv1')
+    model = conv_layer(model, W_conv2, b_conv2, name='conv2')
 
-    W_fc1 = weight_variable([33 * 33 * 64, 1024])
+    W_conv3 = weight_variable([5, 5, 64, 128])
+    b_conv3 = bias_variable([128])
+
+    model = conv_layer(model,W_conv3,b_conv3,name='conv3')
+
+    W_conv4 = weight_variable([5, 5, 128, 256])
+    b_conv4 = bias_variable([256])
+
+
+    model = conv_layer(model,W_conv4,b_conv4,name='conv4')
+
+    W_fc1 = weight_variable([9 * 9 * 256, 1024])
     b_fc1 = bias_variable([1024])
+    print model.shape
 
-    model = tf.reshape(model, [-1, 33 * 33 * 64])
+    model = tf.reshape(model, [-1, 9 * 9 * 256])
     model = fc_layer(model, W_fc1, b_fc1)
+    print model.shape
+
+    W_fc1_5 = weight_variable([1024, 1024])
+    b_fc1_5 = bias_variable([1024])
+    model = fc_layer(model, W_fc1_5, b_fc1_5)
+
+    model = tf.nn.dropout(model, keep_prob)
+
+    W_fc1_6 = weight_variable([1024, 1024])
+    b_fc1_6 = bias_variable([1024])
+    model = fc_layer(model, W_fc1_6, b_fc1_6)
+    
     model = tf.nn.dropout(model, keep_prob)
 
     W_fc2 = weight_variable([1024, 2])
@@ -70,11 +94,11 @@ def build_model(image_size):
         optimizer = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
     with tf.name_scope('accuracy'):
-        correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
+        accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
         tf.summary.scalar('accuracy', accuracy)
 
-    return optimizer, cross_entropy, accuracy, correct_prediction
+    return optimizer, cross_entropy, accuracy, prediction , y_conv
 
 
 def next_batch(batch_size, i, data):
@@ -84,7 +108,7 @@ def next_batch(batch_size, i, data):
 def run_tensorflow_model():
     train_X, train_y, test_X, test_y = save_images_to_arrays()
 
-    optimizer, cost, accuracy, correct_prediction = build_model(130)
+    optimizer, cost, accuracy, prediction, y_conv = build_model(130)
 
     batch_size = 20
     n_batches = (len(train_X) / batch_size) - 2
@@ -94,7 +118,8 @@ def run_tensorflow_model():
         print("Session starting")
 
         merged_summary = tf.summary.merge_all()
-        writer = tf.summary.FileWriter('/tmp/vitaminator/official2')
+        writer = tf.summary.FileWriter('/tmp/vitaminator/official9')
+
         writer.add_graph(sess.graph)
 
         sess.run(tf.global_variables_initializer())
@@ -107,21 +132,16 @@ def run_tensorflow_model():
                 batch_x, batch_y = next_batch(
                     batch_size, i, train_X), next_batch(batch_size, i, train_y)
 
-                _, cross_entropy = sess.run([optimizer, cost], feed_dict={
-                                            x: batch_x, y_: batch_y, keep_prob: 0.5})
-
-                epoch_loss += cross_entropy
-                avg_cost += cross_entropy / n_batches
-
+                sess.run(optimizer, feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.4})
                 if i % 5 == 0:
-                    s = sess.run(merged_summary, feed_dict={
-                                 x: batch_x, y_: batch_y, keep_prob: 0.5})
+                    s = sess.run(merged_summary, feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.4})
                     writer.add_summary(s, i)
 
-            print('Epoch {} completed out of {}, loss: {}, cost: {}'.format(
-                epoch + 1, 500, epoch_loss, avg_cost))
+            print('Epoch {} completed out of {}'.format(
+                epoch + 1, 500, epoch_loss))
 
-        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: 0.5}))
+        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: 0.4}))
+
         saver.save(sess, 'model/my-model')
 
 
