@@ -4,12 +4,12 @@ from bottleneck_keras import save_images_to_arrays
 
 
 LRNING_RATE = 1e-4
-TRAIN_KEEP_PROB = 0.5
+TRAIN_KEEP_PROB = 0.7
 TEST_KEEP_PROB = 1
-TENSORBOARD_DIR = '/tmp/vitaminator/official22'
+TENSORBOARD_DIR = '/tmp/vitaminator/official103'
 
 BATCH_SIZE = 20
-NUMBER_OF_EPOCHS = 80
+NUMBER_OF_EPOCHS = 55
 
 x = tf.placeholder(tf.float32, shape=[None, 130 * 130], name='x_placeholder')
 y_ = tf.placeholder(tf.float32, shape=[None, 2], name='y_placeholder')
@@ -57,25 +57,25 @@ def build_model(image_size):
 
     model = conv_layer(model, W_conv2, b_conv2, name='conv2')
 
-    W_conv3 = weight_variable([5, 5, 64, 128])
-    b_conv3 = bias_variable([128])
+    # W_conv3 = weight_variable([5, 5, 64, 128])
+    # b_conv3 = bias_variable([128])
+    #
+    # model = conv_layer(model, W_conv3, b_conv3, name='conv3')
 
-    model = conv_layer(model, W_conv3, b_conv3, name='conv3')
+    # W_conv4 = weight_variable([5, 5, 128, 256])
+    # b_conv4 = bias_variable([256])
+    #
+    # model = conv_layer(model, W_conv4, b_conv4, name='conv4')
 
-    W_conv4 = weight_variable([5, 5, 128, 256])
-    b_conv4 = bias_variable([256])
-
-    model = conv_layer(model, W_conv4, b_conv4, name='conv4')
-
-    W_fc1 = weight_variable([9 * 9 * 256, 1024])
+    W_fc1 = weight_variable([33 * 33 * 64, 1024])
     b_fc1 = bias_variable([1024])
 
-    model = tf.reshape(model, [-1, 9 * 9 * 256])
+    model = tf.reshape(model, [-1, 33 * 33 * 64])
     model = fc_layer(model, W_fc1, b_fc1)
 
-    W_fc1_5 = weight_variable([1024, 1024])
-    b_fc1_5 = bias_variable([1024])
-    model = fc_layer(model, W_fc1_5, b_fc1_5)
+    # W_fc1_5 = weight_variable([1024, 1024])
+    # b_fc1_5 = bias_variable([1024])
+    # model = fc_layer(model, W_fc1_5, b_fc1_5)
 
     # model = tf.nn.dropout(model, keep_prob)
 
