@@ -40,6 +40,9 @@ def save_images_to_arrays():
 
     train_X, train_y = array_dict[train_data_dir]
     test_X, test_y = array_dict[validation_data_dir]
+
+    create_dir('bottleneck')
+
     np.save('bottleneck/bottleneck_train_X', np.array(train_X))
     np.save('bottleneck/bottleneck_train_y', np.array(train_y))
     np.save('bottleneck/bottleneck_test_X', np.array(test_X))
