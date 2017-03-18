@@ -3,13 +3,13 @@ from process_images import randomly_assign_train_test
 from bottleneck_keras import save_images_to_arrays
 
 
-LRNING_RATE = 1e-5
-TRAIN_KEEP_PROB = 0.7
+LRNING_RATE = 1e-4
+TRAIN_KEEP_PROB = 0.5
 TEST_KEEP_PROB = 1
-TENSORBOARD_DIR = '/tmp/vitaminator/official23'
+TENSORBOARD_DIR = '/tmp/vitaminator/official22'
 
 BATCH_SIZE = 20
-NUMBER_OF_EPOCHS = 70
+NUMBER_OF_EPOCHS = 80
 
 x = tf.placeholder(tf.float32, shape=[None, 130 * 130], name='x_placeholder')
 y_ = tf.placeholder(tf.float32, shape=[None, 2], name='y_placeholder')
