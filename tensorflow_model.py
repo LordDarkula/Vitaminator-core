@@ -3,6 +3,14 @@ from process_images import randomly_assign_train_test
 from bottleneck_keras import save_images_to_arrays
 
 
+LRNING_RATE = 1e-4
+TRAIN_KEEP_PROB = 0.5
+TEST_KEEP_PROB = 1
+TENSORBOARD_DIR = '/tmp/vitaminator/official22'
+
+BATCH_SIZE = 20
+NUMBER_OF_EPOCHS = 80
+
 x = tf.placeholder(tf.float32, shape=[None, 130 * 130], name='x_placeholder')
 y_ = tf.placeholder(tf.float32, shape=[None, 2], name='y_placeholder')
 keep_prob = tf.placeholder(tf.float32)
@@ -52,21 +60,18 @@ def build_model(image_size):
     W_conv3 = weight_variable([5, 5, 64, 128])
     b_conv3 = bias_variable([128])
 
-    model = conv_layer(model,W_conv3,b_conv3,name='conv3')
+    model = conv_layer(model, W_conv3, b_conv3, name='conv3')
 
     W_conv4 = weight_variable([5, 5, 128, 256])
     b_conv4 = bias_variable([256])
 
-
-    model = conv_layer(model,W_conv4,b_conv4,name='conv4')
+    model = conv_layer(model, W_conv4, b_conv4, name='conv4')
 
     W_fc1 = weight_variable([9 * 9 * 256, 1024])
     b_fc1 = bias_variable([1024])
-    print model.shape
 
     model = tf.reshape(model, [-1, 9 * 9 * 256])
     model = fc_layer(model, W_fc1, b_fc1)
-    print model.shape
 
     W_fc1_5 = weight_variable([1024, 1024])
     b_fc1_5 = bias_variable([1024])
@@ -77,7 +82,7 @@ def build_model(image_size):
     W_fc1_6 = weight_variable([1024, 1024])
     b_fc1_6 = bias_variable([1024])
     model = fc_layer(model, W_fc1_6, b_fc1_6)
-    
+
     model = tf.nn.dropout(model, keep_prob)
 
     W_fc2 = weight_variable([1024, 2])
@@ -98,11 +103,11 @@ def build_model(image_size):
         accuracy = tf.reduce_mean(tf.cast(prediction, tf.float32))
         tf.summary.scalar('accuracy', accuracy)
 
-    return optimizer, cross_entropy, accuracy, prediction , y_conv
+    return optimizer, cross_entropy, accuracy, prediction, y_conv
 
 
-def next_batch(batch_size, i, data):
-    return data[batch_size * i: batch_size * (i + 1)]
+def next_batch(i, data):
+    return data[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
 
 
 def run_tensorflow_model():
@@ -110,37 +115,37 @@ def run_tensorflow_model():
 
     optimizer, cost, accuracy, prediction, y_conv = build_model(130)
 
-    batch_size = 20
-    n_batches = (len(train_X) / batch_size) - 2
+    n_batches = (len(train_X) / BATCH_SIZE) - 2
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
         print("Session starting")
 
         merged_summary = tf.summary.merge_all()
-        writer = tf.summary.FileWriter('/tmp/vitaminator/official9')
+        writer = tf.summary.FileWriter(TENSORBOARD_DIR)
 
         writer.add_graph(sess.graph)
 
         sess.run(tf.global_variables_initializer())
 
-        for epoch in range(500):
+        for epoch in range(NUMBER_OF_EPOCHS):
             epoch_loss = 0
             avg_cost = 0.0
             for i in range(n_batches):
                 print('batch number: {}'.format(i))
-                batch_x, batch_y = next_batch(
-                    batch_size, i, train_X), next_batch(batch_size, i, train_y)
+                batch_x, batch_y = next_batch(i, train_X), next_batch(i, train_y)
 
-                sess.run(optimizer, feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.4})
+                sess.run(optimizer, feed_dict={x: batch_x, y_: batch_y, keep_prob: TRAIN_KEEP_PROB})
                 if i % 5 == 0:
-                    s = sess.run(merged_summary, feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.4})
+                    s = sess.run(merged_summary, feed_dict={
+                                 x: batch_x, y_: batch_y, keep_prob: TRAIN_KEEP_PROB})
                     writer.add_summary(s, i)
 
             print('Epoch {} completed out of {}'.format(
-                epoch + 1, 500, epoch_loss))
+                epoch + 1, NUMBER_OF_EPOCHS, epoch_loss))
+            print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB}))
 
-        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: 0.4}))
+        print('Accuracy:', accuracy.eval({x: test_X, y_: test_y, keep_prob: TEST_KEEP_PROB}))
 
         saver.save(sess, 'model/my-model')
 
@@ -154,7 +159,7 @@ def restore_model():
 
 if __name__ == '__main__':
     # First run
-    randomly_assign_train_test('images')
+    randomly_assign_train_test('images', remove_data_folder=True)
     run_tensorflow_model()
 
     # To restore model
