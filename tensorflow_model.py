@@ -4,12 +4,12 @@ from bottleneck_keras import save_images_to_arrays
 
 
 LRNING_RATE = 1e-4
-TRAIN_KEEP_PROB = 0.7
+TRAIN_KEEP_PROB = 0.8
 TEST_KEEP_PROB = 1
-TENSORBOARD_DIR = '/tmp/vitaminator/official103'
+TENSORBOARD_DIR = '/tmp/vitaminator/official110'
 
 BATCH_SIZE = 20
-NUMBER_OF_EPOCHS = 55
+NUMBER_OF_EPOCHS = 40
 
 x = tf.placeholder(tf.float32, shape=[None, 130 * 130], name='x_placeholder')
 y_ = tf.placeholder(tf.float32, shape=[None, 2], name='y_placeholder')
@@ -57,20 +57,20 @@ def build_model(image_size):
 
     model = conv_layer(model, W_conv2, b_conv2, name='conv2')
 
-    # W_conv3 = weight_variable([5, 5, 64, 128])
-    # b_conv3 = bias_variable([128])
-    #
-    # model = conv_layer(model, W_conv3, b_conv3, name='conv3')
+    W_conv3 = weight_variable([5, 5, 64, 128])
+    b_conv3 = bias_variable([128])
+
+    model = conv_layer(model, W_conv3, b_conv3, name='conv3')
 
     # W_conv4 = weight_variable([5, 5, 128, 256])
     # b_conv4 = bias_variable([256])
     #
     # model = conv_layer(model, W_conv4, b_conv4, name='conv4')
 
-    W_fc1 = weight_variable([33 * 33 * 64, 1024])
+    W_fc1 = weight_variable([17 * 17 * 128, 1024])
     b_fc1 = bias_variable([1024])
 
-    model = tf.reshape(model, [-1, 33 * 33 * 64])
+    model = tf.reshape(model, [-1, 17 * 17 * 128])
     model = fc_layer(model, W_fc1, b_fc1)
 
     # W_fc1_5 = weight_variable([1024, 1024])
@@ -159,7 +159,7 @@ def restore_model():
 
 if __name__ == '__main__':
     # First run
-    randomly_assign_train_test('images', remove_data_folder=True)
+    randomly_assign_train_test('images', remove_data_folder=True, test_size=0.05)
     run_tensorflow_model()
 
     # To restore model
