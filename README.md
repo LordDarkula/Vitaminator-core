@@ -1,3 +1,15 @@
-# Vitaminator
-Finds whether a patient has vitamin deficiency from a
-picture of their nails.
+# Awards
+- Association for Computing Machinery Award
+- Category Award: Honorable Mention
+
+# A Novel Approach to Detecting Vitamin Deficiency
+
+As a kid, Vikranth would break his bones unexpectedly. For many years, doctors were unable to decipher the cause. Fortunately, doctors were able to unravel and treat the cause of his broken bones, diagnosing him with Vitamin D deficiency. Currently, approximately 80 million in the United States suffer from Vitamin D deficiency, and many go undiagnosed. Vitamin D deficiency weakens bones and severely increases the risk of cardiovascular disease, cognitive impairment, severe asthma, and numerous cancers. Vitamin D deficiency is difficult to diagnose, especially for children, elderly and people in third world countries, where there is limited access to health care. Sufferers of Vitamin D deficiency often go undiagnosed because symptoms are not easily discerned. Leukonychia, a white discoloration on the nails, is a common sign of Vitamin D deficiency. 
+
+To solve this problem, a convolutional neural network, a machine learning algorithm designed for image recognition, was used to identify whether images of nails display signs of Leukonychia. Our goal was to classify nails with a 90% accuracy. Classification using a convolutional network requires a large volume of image data. The collection of images with and without signs of Leukonychia were compiled from free to use sources on the Internet. An image scraper was written to recursively search through and obtain images of nails. Through regular expressions, the websites searched were assessed for credibility and whether the images were affected. Low-quality images were removed from the dataset to ensure the success of the model. 
+
+After gathering images, the model was ready to train. The main parameters that compose a convolutional network are number of convolutions, learning rate, and dropout rate. By changing the number of convolutions, which determine the complexity, from two to four, experimentation revealed that three convolutions were optimal for the complex nature of the dataset. The learning rate, which decides the sensitivity to the relationship between the two types of nails, was varied between 10^-3, 10^-4, and 10^-5. A learning rate of 10^-4 allowed for a model that fit the data effectively. The dropout rate, the probability of a neuron removed from the model, prevents overfitting, the inability to discern the underlying relationship between the two types of nails. Dropout rates from 0.0 to 0.8 were examined, and the optimal dropout rate was determined to be 0.2. Through trial and error, the model achieved a final accuracy of 93.33%, surpassing our engineering goal. 
+
+A mobile app and website were constructed to allow for deployment in the field. The mobile app is capable of classifying a picture of a person’s nail within seconds. All data is encrypted and kept anonymous as privacy is vital. In the future, the model will be reviewed by doctors, used to help their patients with early diagnosis, and comply with HIPAA. The app will be deployed in the third world to ensure a quick diagnoses. We hope our prototype will one day aid the immediate detection and treatment of Vitamin D deficiency.
+
+
